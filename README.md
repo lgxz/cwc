@@ -1,0 +1,2 @@
+# cwc
+Coin Wallet Cracker
