@@ -26,6 +26,7 @@ func init() {
 	if oMaxCPU <= 0 {
 		oMaxCPU = runtime.NumCPU()
 	}
+	fmt.Printf("Use %d CPU\n", oMaxCPU)
 }
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 	if flag.NArg() > 0 {
 		for _, password := range flag.Args() {
 			if wallet.CheckPassword(password) {
-				fmt.Printf("OK: %s", password)
+				fmt.Fprintf(os.Stderr, "OK: %s\n", password)
 				break
 			}
 		}
@@ -63,6 +64,8 @@ func main() {
 	}
 
 	t_start := time.Now()
+	elapsed := func() float64 { return time.Now().Sub(t_start).Seconds() }
+
 	count := 0
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -73,5 +76,5 @@ func main() {
 
 	close(pipe)
 	wg.Wait()
-	fmt.Printf("Total: %d, PPS: %.02f\n", count, float64(count)/time.Now().Sub(t_start).Seconds())
+	fmt.Printf("Total: %d, PPS: %.02f\n", count, float64(count)/elapsed())
 }
