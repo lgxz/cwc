@@ -26,7 +26,6 @@ func init() {
 	if oMaxCPU <= 0 {
 		oMaxCPU = runtime.NumCPU()
 	}
-	fmt.Printf("Use %d CPU\n", oMaxCPU)
 }
 
 func main() {
@@ -48,6 +47,7 @@ func main() {
 	}
 
 	var wg sync.WaitGroup
+	fmt.Printf("Use %d CPU\n", oMaxCPU)
 	pipe := make(chan string, 1024)
 	for i := 0; i < oMaxCPU; i++ {
 		go func(id int) {

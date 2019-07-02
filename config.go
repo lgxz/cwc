@@ -12,7 +12,6 @@ type Config struct {
 }
 
 type WalletOptions struct {
-	Coin             string
 	Salt             string
 	DeriveIterations uint32
 	Crypted_key      string

@@ -6,7 +6,9 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"log"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
@@ -21,15 +23,10 @@ type Wallet struct {
 }
 
 var m_curve = secp256k1.S256()
-var m_coins = map[string]string{"btc": "03", "ltc": "02"}
 
 // Calc pubkey hash
-func GetPubkeyHash(pubkey string, coin string) []byte {
-	code, found := m_coins[coin]
-	if !found {
-		panic("Unknown coin: " + coin)
-	}
-	pubkey_bc, _ := hex.DecodeString(code + pubkey)
+func GetPubkeyHash(pubkey string) []byte {
+	pubkey_bc, _ := hex.DecodeString(pubkey)
 	data := sha256.Sum256(pubkey_bc)
 	data = sha256.Sum256(data[:])
 	return data[0:16]
@@ -39,13 +36,19 @@ func GetPubkeyHash(pubkey string, coin string) []byte {
 func NewWallet(options *WalletOptions) *Wallet {
 	w := new(Wallet)
 
+	// Supports compressed pubkey only
+	pubkey := options.Pubkey
+	if len(pubkey) != 66 || !(strings.HasPrefix(pubkey, "02") || strings.HasPrefix(pubkey, "03")) {
+		log.Panicf("Invalid pubkey: %s\n", pubkey)
+	}
+
 	salt, _ := hex.DecodeString(options.Salt)
 	w.salt = string(salt)
 	w.nDeriveIterations = options.DeriveIterations
 	w.crypted_key, _ = hex.DecodeString(options.Crypted_key)
 	w.ckey, _ = hex.DecodeString(options.Ckey)
-	w.pubkey_hash = GetPubkeyHash(options.Pubkey, options.Coin)
-	w.pubkey, _ = new(big.Int).SetString(options.Pubkey, 16)
+	w.pubkey_hash = GetPubkeyHash(options.Pubkey)
+	w.pubkey, _ = new(big.Int).SetString(options.Pubkey[2:], 16)
 	return w
 }
 
